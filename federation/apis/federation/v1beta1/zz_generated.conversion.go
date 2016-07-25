@@ -23,6 +23,7 @@ package v1beta1
 import (
 	federation "k8s.io/kubernetes/federation/apis/federation"
 	api "k8s.io/kubernetes/pkg/api"
+	resource "k8s.io/kubernetes/pkg/api/resource"
 	v1 "k8s.io/kubernetes/pkg/api/v1"
 	conversion "k8s.io/kubernetes/pkg/conversion"
 )
@@ -234,6 +235,9 @@ func Convert_federation_ClusterSpec_To_v1beta1_ClusterSpec(in *federation.Cluste
 }
 
 func autoConvert_v1beta1_ClusterStatus_To_federation_ClusterStatus(in *ClusterStatus, out *federation.ClusterStatus, s conversion.Scope) error {
+	if err := v1.Convert_v1_ResourceList_To_api_ResourceList(&in.Usage, &out.Usage, s); err != nil {
+		return err
+	}
 	if in.Conditions != nil {
 		in, out := &in.Conditions, &out.Conditions
 		*out = make([]federation.ClusterCondition, len(*in))
@@ -255,6 +259,19 @@ func Convert_v1beta1_ClusterStatus_To_federation_ClusterStatus(in *ClusterStatus
 }
 
 func autoConvert_federation_ClusterStatus_To_v1beta1_ClusterStatus(in *federation.ClusterStatus, out *ClusterStatus, s conversion.Scope) error {
+	if in.Usage != nil {
+		in, out := &in.Usage, &out.Usage
+		*out = make(v1.ResourceList, len(*in))
+		for key, val := range *in {
+			newVal := new(resource.Quantity)
+			if err := api.Convert_resource_Quantity_To_resource_Quantity(&val, newVal, s); err != nil {
+				return err
+			}
+			(*out)[v1.ResourceName(key)] = *newVal
+		}
+	} else {
+		out.Usage = nil
+	}
 	if in.Conditions != nil {
 		in, out := &in.Conditions, &out.Conditions
 		*out = make([]ClusterCondition, len(*in))

@@ -140,6 +140,15 @@ func DeepCopy_federation_ClusterStatus(in interface{}, out interface{}, c *conve
 	{
 		in := in.(*ClusterStatus)
 		out := out.(*ClusterStatus)
+		if in.Usage != nil {
+			in, out := &in.Usage, &out.Usage
+			*out = make(api.ResourceList)
+			for key, val := range *in {
+				(*out)[key] = val.DeepCopy()
+			}
+		} else {
+			out.Usage = nil
+		}
 		if in.Conditions != nil {
 			in, out := &in.Conditions, &out.Conditions
 			*out = make([]ClusterCondition, len(*in))

@@ -130,6 +130,12 @@ func (cc *ClusterController) GetClusterStatus(cluster *federation_v1beta1.Cluste
 		cc.clusterKubeClientMap[cluster.Name] = clusterClient
 	}
 	clusterStatus := clusterClient.GetClusterHealthStatus()
+	clusterUsageMetrics, err := clusterClient.GetClusterMetrics()
+	if err != nil {
+		glog.Infof("Failed to get cluster metrics, err: %v", err)
+	}
+	clusterStatus.Usage = *clusterUsageMetrics
+
 	return clusterStatus, nil
 }
 

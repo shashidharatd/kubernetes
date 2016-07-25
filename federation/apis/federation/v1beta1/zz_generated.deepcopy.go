@@ -122,6 +122,15 @@ func DeepCopy_v1beta1_ClusterStatus(in interface{}, out interface{}, c *conversi
 	{
 		in := in.(*ClusterStatus)
 		out := out.(*ClusterStatus)
+		if in.Usage != nil {
+			in, out := &in.Usage, &out.Usage
+			*out = make(v1.ResourceList)
+			for key, val := range *in {
+				(*out)[key] = val.DeepCopy()
+			}
+		} else {
+			out.Usage = nil
+		}
 		if in.Conditions != nil {
 			in, out := &in.Conditions, &out.Conditions
 			*out = make([]ClusterCondition, len(*in))

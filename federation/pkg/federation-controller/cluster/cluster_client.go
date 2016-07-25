@@ -30,6 +30,8 @@ import (
 	"k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/client/typed/discovery"
 	"k8s.io/kubernetes/pkg/util/sets"
+
+	"k8s.io/kubernetes/federation/pkg/federation-controller/cluster/metrics"
 )
 
 const (
@@ -42,6 +44,7 @@ const (
 type ClusterClient struct {
 	discoveryClient *discovery.DiscoveryClient
 	kubeClient      *clientset.Clientset
+	metricsClient   metrics.MetricsClient
 }
 
 func NewClusterClientSet(c *federation_v1beta1.Cluster) (*ClusterClient, error) {
@@ -59,6 +62,13 @@ func NewClusterClientSet(c *federation_v1beta1.Cluster) (*ClusterClient, error) 
 		if clusterClientSet.kubeClient == nil {
 			return nil, nil
 		}
+		clusterClientSet.metricsClient = metrics.NewHeapsterMetricsClient(
+			clusterClientSet.kubeClient,
+			metrics.DefaultHeapsterNamespace,
+			metrics.DefaultHeapsterScheme,
+			metrics.DefaultHeapsterService,
+			metrics.DefaultHeapsterPort,
+		)
 	}
 	return &clusterClientSet, err
 }
@@ -166,4 +176,9 @@ func getZoneNames(client *clientset.Clientset) (zones []string, region string, e
 		}
 	}
 	return zoneNames.List(), region, nil
+}
+
+// GetClusterMetrics gets the kubernetes cluster usage metrics
+func (self *ClusterClient) GetClusterMetrics() (*v1.ResourceList, error) {
+	return self.metricsClient.GetClusterMetrics()
 }

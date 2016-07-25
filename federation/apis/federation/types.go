@@ -73,6 +73,8 @@ type ClusterCondition struct {
 
 // ClusterStatus is information about the current status of a cluster updated by cluster controller peridocally.
 type ClusterStatus struct {
+	// Usage represents the resources of a cluster that are used already.
+	Usage api.ResourceList `json:"usage,omitempty"`
 	// Conditions is an array of current cluster conditions.
 	Conditions []ClusterCondition `json:"conditions,omitempty"`
 	// Zones is the list of avaliability zones in which the nodes of the cluster exist, e.g. 'us-east1-a'.
