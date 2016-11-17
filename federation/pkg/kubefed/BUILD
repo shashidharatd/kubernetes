@@ -11,6 +11,7 @@ load(
 go_library(
     name = "go_default_library",
     srcs = [
+        "coredns.go",
         "join.go",
         "kubefed.go",
         "unjoin.go",
@@ -22,6 +23,8 @@ go_library(
         "//federation/pkg/kubefed/util:go_default_library",
         "//pkg/api:go_default_library",
         "//pkg/api/errors:go_default_library",
+        "//pkg/apis/extensions:go_default_library",
+        "//pkg/client/clientset_generated/internalclientset:go_default_library",
         "//pkg/client/unversioned/clientcmd:go_default_library",
         "//pkg/client/unversioned/clientcmd/api:go_default_library",
         "//pkg/kubectl:go_default_library",
@@ -32,6 +35,7 @@ go_library(
         "//pkg/runtime:go_default_library",
         "//pkg/runtime/schema:go_default_library",
         "//pkg/util/flag:go_default_library",
+        "//pkg/util/intstr:go_default_library",
         "//vendor:github.com/golang/glog",
         "//vendor:github.com/spf13/cobra",
     ],
