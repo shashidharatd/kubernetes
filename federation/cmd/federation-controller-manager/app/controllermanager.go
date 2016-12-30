@@ -99,12 +99,12 @@ func Run(s *options.CMServer) error {
 	// TODO(madhusudancs): Remove this in 1.6.
 	var restClientCfg *restclient.Config
 	var err error
-	if len(s.Kubeconfig) <= 0 {
-		restClientCfg, err = restClientConfigFromSecret(s.Master)
-		if err != nil {
-			return err
-		}
-	} else {
+	//if len(s.Kubeconfig) <= 0 {
+	//	restClientCfg, err = restClientConfigFromSecret(s.Master)
+	//	if err != nil {
+	//		return err
+	//	}
+	//} else {
 		// Create the config to talk to federation-apiserver.
 		restClientCfg, err = clientcmd.BuildConfigFromFlags(s.Master, s.Kubeconfig)
 		if err != nil || restClientCfg == nil {
@@ -117,7 +117,7 @@ func Run(s *options.CMServer) error {
 				return err
 			}
 		}
-	}
+	//}
 
 	// Override restClientCfg qps/burst settings from flags
 	restClientCfg.QPS = s.APIServerQPS
