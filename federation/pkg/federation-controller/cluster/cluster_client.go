@@ -113,7 +113,7 @@ func (self *ClusterClient) GetClusterHealthStatus() *federation_v1beta1.ClusterS
 }
 
 // GetClusterZones gets the kubernetes cluster zones and region by inspecting labels on nodes in the cluster.
-func (self *ClusterClient) GetClusterZones() (zones []string, region string, err error) {
+func (self *ClusterClient) GetClusterZones() (node string, zones []string, region string, err error) {
 	return getZoneNames(self.kubeClient)
 }
 
@@ -140,12 +140,12 @@ func getRegionNameForNode(node api.Node) (string, error) {
 }
 
 // Find the names of all zones and the region in which we have nodes in this cluster.
-func getZoneNames(client *clientset.Clientset) (zones []string, region string, err error) {
+func getZoneNames(client *clientset.Clientset) (nodeIp string, zones []string, region string, err error) {
 	zoneNames := sets.NewString()
 	nodes, err := client.Core().Nodes().List(api.ListOptions{})
 	if err != nil {
 		glog.Errorf("Failed to list nodes while getting zone names: %v", err)
-		return nil, "", err
+		return "", nil, "", err
 	}
 	for i, node := range nodes.Items {
 		// TODO: quinton-hoole make this more efficient.
@@ -155,15 +155,26 @@ func getZoneNames(client *clientset.Clientset) (zones []string, region string, e
 		//       which zones are included.  Rather get this info from there, because it's cheaper.
 		zoneName, err := getZoneNameForNode(node)
 		if err != nil {
-			return nil, "", err
+			return "", nil, "", err
 		}
 		zoneNames.Insert(zoneName)
 		if i == 0 {
 			region, err = getRegionNameForNode(node)
 			if err != nil {
-				return nil, "", err
+				return "", nil, "", err
+			}
+			for _, address := range node.Status.Addresses {
+				if address.Type == api.NodeExternalIP {
+					nodeIp = address.Address
+					break
+				} else if address.Type == api.NodeInternalIP {
+					nodeIp = address.Address
+					continue
+				} else {
+					nodeIp = address.Address
+				}
 			}
 		}
 	}
-	return zoneNames.List(), region, nil
+	return nodeIp, zoneNames.List(), region, nil
 }

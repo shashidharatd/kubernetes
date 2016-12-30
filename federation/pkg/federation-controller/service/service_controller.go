@@ -567,9 +567,16 @@ func (sc *ServiceController) reconcileService(serviceKey types.NamespacedName) (
 						addresses = append(addresses, ingress.Hostname)
 					}
 				}
+			} else if fedService.Spec.Type == apiv1.ServiceTypeNodePort {
+				if cluster.Annotations != nil {
+					if nodeIp, ok := cluster.Annotations[util.FederationClusterNodeIP]; ok {
+						addresses = append(addresses, nodeIp)
+					}
+				}
 			}
 
-			if fedService.Spec.Type == apiv1.ServiceTypeLoadBalancer {
+			if fedService.Spec.Type == apiv1.ServiceTypeLoadBalancer ||
+				fedService.Spec.Type == apiv1.ServiceTypeNodePort {
 				for _, address := range addresses {
 					region := cluster.Status.Region
 					// zone level - TODO might need other zone names for multi-zone clusters
@@ -598,7 +605,8 @@ func (sc *ServiceController) reconcileService(serviceKey types.NamespacedName) (
 
 	// Update the federation service if there is any update in clustered service either is loadbalancer status or
 	// endpoints update
-	if fedService.Spec.Type == apiv1.ServiceTypeLoadBalancer {
+	if fedService.Spec.Type == apiv1.ServiceTypeLoadBalancer ||
+		fedService.Spec.Type == apiv1.ServiceTypeNodePort {
 		// Sort the endpoints information in annotations so that we can compare
 		for _, region := range newServiceIngress.Endpoints {
 			for _, zone := range region {

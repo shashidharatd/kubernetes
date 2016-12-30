@@ -24,6 +24,7 @@ import (
 	federationv1beta1 "k8s.io/kubernetes/federation/apis/federation/v1beta1"
 	clustercache "k8s.io/kubernetes/federation/client/cache"
 	federationclientset "k8s.io/kubernetes/federation/client/clientset_generated/federation_clientset"
+	"k8s.io/kubernetes/federation/pkg/federation-controller/util"
 	"k8s.io/kubernetes/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/client/cache"
 	"k8s.io/kubernetes/pkg/controller"
@@ -188,13 +189,17 @@ func (cc *ClusterController) UpdateClusterStatus() error {
 			continue
 		}
 
-		zones, region, err := clusterClient.GetClusterZones()
+		nodeIp, zones, region, err := clusterClient.GetClusterZones()
 		if err != nil {
 			glog.Warningf("Failed to get zones and region for cluster %s: %v", cluster.Name, err)
 			// Don't return err here, as we want the rest of the status update to proceed.
 		} else {
 			clusterStatusNew.Zones = zones
 			clusterStatusNew.Region = region
+			if cluster.Annotations == nil {
+				cluster.Annotations = make(map[string]string)
+			}
+			cluster.Annotations[util.FederationClusterNodeIP] = nodeIp
 		}
 		cc.clusterClusterStatusMap[cluster.Name] = *clusterStatusNew
 		cluster.Status = *clusterStatusNew

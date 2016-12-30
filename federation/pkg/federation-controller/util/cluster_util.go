@@ -41,6 +41,9 @@ const (
 	KubeconfigSecretDataKey = "kubeconfig"
 	getSecretTimeout        = 1 * time.Minute
 )
+const (
+	FederationClusterNodeIP = "federation.kubernetes.io/first-node-ip"
+)
 
 func BuildClusterConfig(c *federation_v1beta1.Cluster) (*restclient.Config, error) {
 	var serverAddress string
