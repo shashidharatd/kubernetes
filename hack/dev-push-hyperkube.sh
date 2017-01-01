@@ -40,10 +40,17 @@ fi
 
 IMAGE="${REGISTRY}/hyperkube-amd64:${VERSION}"
 
-kube::build::verify_prereqs
-kube::build::build_image
-kube::build::run_build_command make WHAT=cmd/hyperkube
-kube::build::copy_output
+if [[ -z "${BASEIMAGE}" ]]; then
+    kube::build::verify_prereqs
+    kube::build::build_image
+    kube::build::run_build_command make WHAT=cmd/hyperkube
+    kube::build::copy_output
 
-make -C "${KUBE_ROOT}/cluster/images/hyperkube" build
+    make -C "${KUBE_ROOT}/cluster/images/hyperkube" build
+else
+    make WHAT=cmd/hyperkube
+
+    make -C "${KUBE_ROOT}/cluster/images/hyperkube-simple" build
+fi
+
 docker push "${IMAGE}"
