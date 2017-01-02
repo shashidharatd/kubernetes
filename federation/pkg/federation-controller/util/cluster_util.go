@@ -42,7 +42,8 @@ const (
 	getSecretTimeout        = 1 * time.Minute
 )
 const (
-	FederationClusterNodeIP = "federation.kubernetes.io/first-node-ip"
+	FederationClusterNodeIP         = "federation.kubernetes.io/first-node-ip"
+	FederationClusterDebugGoOffline = "federation.kubernetes.io/go-offline"
 )
 
 func BuildClusterConfig(c *federation_v1beta1.Cluster) (*restclient.Config, error) {

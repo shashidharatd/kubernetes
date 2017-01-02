@@ -130,6 +130,21 @@ func (cc *ClusterController) GetClusterStatus(cluster *federationv1beta1.Cluster
 		cc.clusterKubeClientMap[cluster.Name] = clusterClient
 	}
 	clusterStatus := clusterClient.GetClusterHealthStatus()
+	if cluster.Annotations != nil {
+		goOffline, ok := cluster.Annotations[util.FederationClusterDebugGoOffline]
+		if ok && goOffline == "true" {
+			newNodeOfflineCondition := federationv1beta1.ClusterCondition{
+				Type:               federationv1beta1.ClusterOffline,
+				Status:             v1.ConditionTrue,
+				Reason:             "ClusterNotReachable",
+				Message:            "cluster is not reachable",
+				LastProbeTime:      clusterStatus.Conditions[0].LastProbeTime,
+				LastTransitionTime: clusterStatus.Conditions[0].LastTransitionTime,
+			}
+			clusterStatus.Conditions[0] = newNodeOfflineCondition
+		}
+	}
+
 	return clusterStatus, nil
 }
 
