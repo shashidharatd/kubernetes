@@ -42,6 +42,10 @@ const (
 	getSecretTimeout        = 1 * time.Minute
 )
 
+const (
+	FederationClusterDebugGoOffline = "federation.kubernetes.io/go-offline"
+)
+
 func BuildClusterConfig(c *federation_v1beta1.Cluster) (*restclient.Config, error) {
 	var serverAddress string
 	var clusterConfig *restclient.Config
