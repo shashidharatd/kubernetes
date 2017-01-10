@@ -99,25 +99,25 @@ func Run(s *options.CMServer) error {
 	// TODO(madhusudancs): Remove this in 1.6.
 	var restClientCfg *restclient.Config
 	var err error
-	if len(s.Kubeconfig) <= 0 {
+	//if len(s.Kubeconfig) <= 0 {
+	//	restClientCfg, err = restClientConfigFromSecret(s.Master)
+	//	if err != nil {
+	//		return err
+	//	}
+	//} else {
+	// Create the config to talk to federation-apiserver.
+	restClientCfg, err = clientcmd.BuildConfigFromFlags(s.Master, s.Kubeconfig)
+	if err != nil || restClientCfg == nil {
+		// Retry with the deprecated name in 1.5.
+		// TODO(madhusudancs): Remove this in 1.6.
+		glog.V(2).Infof("Couldn't build the rest client config from flags: %v", err)
+		glog.V(2).Infof("Trying with deprecated secret: %s", DeprecatedKubeconfigSecretName)
 		restClientCfg, err = restClientConfigFromSecret(s.Master)
 		if err != nil {
 			return err
 		}
-	} else {
-		// Create the config to talk to federation-apiserver.
-		restClientCfg, err = clientcmd.BuildConfigFromFlags(s.Master, s.Kubeconfig)
-		if err != nil || restClientCfg == nil {
-			// Retry with the deprecated name in 1.5.
-			// TODO(madhusudancs): Remove this in 1.6.
-			glog.V(2).Infof("Couldn't build the rest client config from flags: %v", err)
-			glog.V(2).Infof("Trying with deprecated secret: %s", DeprecatedKubeconfigSecretName)
-			restClientCfg, err = restClientConfigFromSecret(s.Master)
-			if err != nil {
-				return err
-			}
-		}
 	}
+	//}
 
 	// Override restClientCfg qps/burst settings from flags
 	restClientCfg.QPS = s.APIServerQPS

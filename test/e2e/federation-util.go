@@ -69,15 +69,15 @@ func createClusterObjectOrFail(f *framework.Framework, context *framework.E2ECon
 			ServerAddressByClientCIDRs: []federationapi.ServerAddressByClientCIDR{
 				{
 					ClientCIDR:    "0.0.0.0/0",
-					ServerAddress: context.Cluster.Cluster.Server,
+					ServerAddress: "http://172.17.0.1:8888",
 				},
 			},
-			SecretRef: &v1.LocalObjectReference{
-				// Note: Name must correlate with federation build script secret name,
-				//       which currently matches the cluster name.
-				//       See federation/cluster/common.sh:132
-				Name: context.Name,
-			},
+			//SecretRef: &v1.LocalObjectReference{
+			//	// Note: Name must correlate with federation build script secret name,
+			//	//       which currently matches the cluster name.
+			//	//       See federation/cluster/common.sh:132
+			//	Name: context.Name,
+			//},
 		},
 	}
 	_, err := f.FederationClientset_1_5.Federation().Clusters().Create(&cluster)
