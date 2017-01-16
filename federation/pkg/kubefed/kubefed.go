@@ -21,6 +21,7 @@ import (
 
 	"k8s.io/apiserver/pkg/util/flag"
 	"k8s.io/client-go/tools/clientcmd"
+	coredns "k8s.io/kubernetes/federation/pkg/kubefed/coredns"
 	kubefedinit "k8s.io/kubernetes/federation/pkg/kubefed/init"
 	"k8s.io/kubernetes/federation/pkg/kubefed/util"
 	kubectl "k8s.io/kubernetes/pkg/kubectl/cmd"
@@ -53,6 +54,7 @@ func NewKubeFedCommand(f cmdutil.Factory, in io.Reader, out, err io.Writer) *cob
 		{
 			Message: "Basic Commands:",
 			Commands: []*cobra.Command{
+				coredns.NewCmdDeployCoreDNS(out, util.NewAdminConfig(clientcmd.NewDefaultPathOptions())),
 				kubefedinit.NewCmdInit(out, util.NewAdminConfig(clientcmd.NewDefaultPathOptions())),
 				NewCmdJoin(f, out, util.NewAdminConfig(clientcmd.NewDefaultPathOptions())),
 				NewCmdUnjoin(f, out, err, util.NewAdminConfig(clientcmd.NewDefaultPathOptions())),

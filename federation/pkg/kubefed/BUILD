@@ -18,6 +18,7 @@ go_library(
     tags = ["automanaged"],
     deps = [
         "//federation/apis/federation:go_default_library",
+        "//federation/pkg/kubefed/coredns:go_default_library",
         "//federation/pkg/kubefed/init:go_default_library",
         "//federation/pkg/kubefed/util:go_default_library",
         "//pkg/kubectl:go_default_library",
@@ -77,6 +78,7 @@ filegroup(
     name = "all-srcs",
     srcs = [
         ":package-srcs",
+        "//federation/pkg/kubefed/coredns:all-srcs",
         "//federation/pkg/kubefed/init:all-srcs",
         "//federation/pkg/kubefed/testing:all-srcs",
         "//federation/pkg/kubefed/util:all-srcs",
