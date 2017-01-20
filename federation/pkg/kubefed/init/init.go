@@ -503,7 +503,7 @@ func createAPIServer(clientset *client.Clientset, namespace, name, image, creden
 						},
 						{
 							Name:  "etcd",
-							Image: "gcr.io/google_containers/etcd:3.0.14-alpha.1",
+							Image: "172.17.0.1:5000/etcd:3.0.14-alpha.1",
 							Command: []string{
 								"/usr/local/bin/etcd",
 								"--data-dir",
