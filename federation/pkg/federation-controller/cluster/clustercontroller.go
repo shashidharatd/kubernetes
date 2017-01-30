@@ -213,6 +213,17 @@ func (cc *ClusterController) UpdateClusterStatus() error {
 			clusterStatusNew.Zones = zones
 			clusterStatusNew.Region = region
 		}
+
+		ip, err := getFirstNodeIP(clusterClient.kubeClient)
+		if err != nil {
+			glog.Warningf("Failed to get First node ip of cluster %s: %v", cluster.Name, err)
+		} else {
+			if cluster.Annotations == nil {
+				cluster.Annotations = make(map[string]string)
+			}
+			cluster.Annotations["federation.kubernetes.io/first-node-ip"] = ip
+		}
+
 		cc.clusterClusterStatusMap[cluster.Name] = *clusterStatusNew
 		cluster.Status = *clusterStatusNew
 		cluster, err := cc.federationClient.Federation().Clusters().UpdateStatus(&cluster)

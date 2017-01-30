@@ -167,3 +167,40 @@ func getZoneNames(client *clientset.Clientset) (zones []string, region string, e
 	}
 	return zoneNames.List(), region, nil
 }
+
+func getFirstNodeIP(client *clientset.Clientset) (string, error) {
+	nodes, err := client.Core().Nodes().List(metav1.ListOptions{})
+	if err != nil {
+		glog.Errorf("Failed to list nodes while getting zone names: %v", err)
+		return "", err
+	} else if len(nodes.Items) < 1 {
+		glog.Errorf("No nodes in cluster")
+		return "", fmt.Errorf("No nodes in cluster")
+	}
+
+	ip, err := GetPreferredNodeAddress(&nodes.Items[0], []api.NodeAddressType{api.NodeExternalIP, api.NodeLegacyHostIP, api.NodeInternalIP})
+	if err != nil {
+		glog.Errorf("Unexpected error: %v", err)
+		return "", err
+	}
+
+	return ip, nil
+}
+
+func GetPreferredNodeAddress(node *api.Node, preferredAddressTypes []api.NodeAddressType) (string, error) {
+	for _, addressType := range preferredAddressTypes {
+		for _, address := range node.Status.Addresses {
+			if address.Type == addressType {
+				return address.Address, nil
+			}
+		}
+		// If hostname was requested and no Hostname address was registered...
+		if addressType == api.NodeHostName {
+			// ...fall back to the kubernetes.io/hostname label for compatibility with kubelets before 1.5
+			if hostname, ok := node.Labels[metav1.LabelHostname]; ok && len(hostname) > 0 {
+				return hostname, nil
+			}
+		}
+	}
+	return "", fmt.Errorf("no preferred addresses found; known addresses: %v", node.Status.Addresses)
+}
